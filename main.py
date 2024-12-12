@@ -1,6 +1,10 @@
 import requests
 import json
 from geopy import distance
+from flask import Flask, render_template, flash, request
+
+app = Flask(__name__)
+app.secret_key = "ice, ice, maybe"
 
 
 def parse_to_float(text: str) -> float:
@@ -53,12 +57,11 @@ def get_rink_values(coordinates: tuple[float, float], rink: dict) -> tuple[dict,
     """Returns a rink object modified to have its geomtery set as object values, and the distance from the input
     coordinates to the rink."""
     rink["geometry"] = json.loads(rink["geometry"])
-    print(f'{coordinates}, {(rink["geometry"]["coordinates"][1], rink["geometry"]["coordinates"][0])}')
     return rink, distance.distance(coordinates,
                                    (rink["geometry"]["coordinates"][1], rink["geometry"]["coordinates"][0])).km
 
 
-def get_rink_closest_to_coordinates(coordinates: tuple[float, float]) -> None:
+def get_rink_closest_to_coordinates(coordinates: tuple[float, float]) -> str:
     """Returns the closest rink to a set of coordinates."""
     rinks: list[dict] = get_outdoor_rinks()  # get the latest data, even if locations are not likely to change often
     (closest_rink, closest_distance) = get_rink_values(coordinates, rinks[0])
@@ -68,17 +71,32 @@ def get_rink_closest_to_coordinates(coordinates: tuple[float, float]) -> None:
         if rink_distance < closest_distance:
             closest_rink = rink
             closest_distance = rink_distance
-    print(
+    return (
         f'The closest rink to the input coordinates is {closest_rink["Public Name"]}.\nIt is {closest_distance} km '
-        f'away.\nIts full information is: {closest_rink}')
+        f'away at {closest_rink['geometry']['coordinates']}.'
+    )
 
 
 def main():
     print('Enter your coordinates as "latitude, longitude".')
     coordinates_text = input()
     coordinates = parse_coordinates_text(coordinates_text)
-    get_rink_closest_to_coordinates(coordinates)
+    print(get_rink_closest_to_coordinates(coordinates))
+
+
+@app.route("/")
+def index():
+    flash('Enter your coordinates as "latitude, longitude".')
+    return render_template("index.html")
+
+
+@app.route("/closest_rink", methods=["POST", "GET"])
+def closest_rink():
+    coordinates = parse_coordinates_text(request.form['coordinates_input'])
+    flash(get_rink_closest_to_coordinates(coordinates))
+    return render_template("index.html")
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    app.run(host="127.0.0.1", port=8080, debug=True)

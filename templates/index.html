@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>index</title>
+    </head>
+    <body>
+        <form action="closest_rink" method="post">
+            {% for message in get_flashed_messages()%}
+                <p> {{message}} </p>
+            {% endfor %}
+            <p></p>
+            <br>
+            <input type="text" name="coordinates_input">
+            <br>
+            <input type="submit" value="Find closest rink" id="coordinates_submit">
+        </form>
+    </body>
+</html>
