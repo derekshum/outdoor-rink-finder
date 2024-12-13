@@ -23,7 +23,7 @@ def parse_coordinates_text(text: str) -> tuple[float, float]:
         raise Exception('Invalid input: more than one comma')
     elif len(text_parts) < 2:
         raise Exception('Invalid input: no comma')
-    return (parse_to_float(text_parts[0]), parse_to_float(text_parts[1]))
+    return parse_to_float(text_parts[0]), parse_to_float(text_parts[1])
 
 
 def get_outdoor_rinks() -> list[dict]:
@@ -77,13 +77,6 @@ def get_rink_closest_to_coordinates(coordinates: tuple[float, float]) -> str:
     )
 
 
-def main():
-    print('Enter your coordinates as "latitude, longitude".')
-    coordinates_text = input()
-    coordinates = parse_coordinates_text(coordinates_text)
-    print(get_rink_closest_to_coordinates(coordinates))
-
-
 @app.route("/")
 def index():
     flash('Enter your coordinates as "latitude, longitude".')
@@ -98,5 +91,4 @@ def closest_rink():
 
 
 if __name__ == '__main__':
-    # main()
     app.run(host="127.0.0.1", port=8080, debug=True)
